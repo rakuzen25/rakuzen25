@@ -1,16 +1,16 @@
-### Hi there 👋
+### Hi there! 👋
 
-<!--
-**leranjun/leranjun** is a ✨ _special_ ✨ repository because its `README.md` (this file) appears on your GitHub profile.
+My name is **Frank** (a.k.a. *Leranjun*/*Rakuzen*)! I'm a current high school student located in Singapore.
 
-Here are some ideas to get you started:
+- 🔭 I’m currently working on a lot of projects.
+- 🌱 I’m currently learning ML, MERN stack and OI.
+- 💬 Ask me about anything! :D
+- 📫 How to reach me: maybe open an issue in this repo?
+- 😄 Pronouns: he/him
+- ⚡ Fun fact: I'm an active editor at [Moegirlpedia](https://zh.moegirl.org.cn/).
 
-- 🔭 I’m currently working on ...
-- 🌱 I’m currently learning ...
-- 👯 I’m looking to collaborate on ...
-- 🤔 I’m looking for help with ...
-- 💬 Ask me about ...
-- 📫 How to reach me: ...
-- 😄 Pronouns: ...
-- ⚡ Fun fact: ...
--->
+![Frank's GitHub Stats](https://github-readme-stats.vercel.app/api?username=leranjun&count_private=true&show_icons=true)
+
+![Top Langs](https://github-readme-stats.vercel.app/api/top-langs/?username=leranjun&langs_count=10)
+
+<!-- ![Frank's Wakatime Stats](https://github-readme-stats.vercel.app/api/wakatime?username=leranjun) -->
