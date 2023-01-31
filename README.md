@@ -3,7 +3,7 @@
 I'm **Frank** (a.k.a. *Leranjun*/*Rakuzen*). I'm a current high school student located in Singapore.
 
 - 🔭 I’m currently working on [Photong](https://github.com/photong-ml).
-- 🌱 I’m currently learning machine learning, front-end development (React) and algorithms for informatics olympiads.
+- 🌱 I’m currently learning machine learning, front-end development (Svelte) and algorithms for informatics olympiads.
 - 💬 Ask me about Python, C++, JavaScript…
 - 📫 How to reach me: feel free to open an issue in this repo!
 - 😄 Pronouns: he/him
