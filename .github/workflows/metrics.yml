@@ -1,0 +1,58 @@
+name: Metrics
+
+on:
+    schedule: [{ cron: "25 9 * * *" }]
+    workflow_dispatch:
+
+jobs:
+    metrics:
+        runs-on: ubuntu-latest
+        steps:
+            - name: GitHub
+              if: ${{ success() || failure() }}
+              uses: lowlighter/metrics@latest
+              with:
+                  filename: github.svg
+                  token: ${{ secrets.METRICS_TOKEN }}
+                  config_timezone: Asia/Singapore
+                  output_action: gist
+                  committer_gist: 3c7c2041dfa27c7413455eae1c7ccb11
+                  base: header, activity, community, repositories, metadata
+                  base_indepth: yes
+                  plugin_activity: yes
+                  plugin_achievements: yes
+                  plugin_followup: yes
+                  plugin_followup_sections: repositories, user
+                  plugin_habits: yes
+                  plugin_habits_facts: yes
+                  plugin_habits_charts: no
+                  plugin_languages: yes
+                  plugin_languages_details: lines, bytes-size, percentage
+                  plugin_languages_indepth: yes
+                  plugin_lines: yes
+                  plugin_notable: yes
+                  plugin_notable_from: all
+                  plugin_notable_repositories: yes
+                  plugin_notable_types: commit, pull_request, issue
+                  plugin_notable_self: yes
+                  plugin_people: yes
+                  plugin_traffic: yes
+                  plugin_wakatime: yes
+                  plugin_wakatime_token: ${{ secrets.WAKATIME_TOKEN }}
+
+            - name: Fun
+              if: ${{ success() || failure() }}
+              uses: lowlighter/metrics@latest
+              with:
+                  filename: fun.svg
+                  token: ${{ secrets.METRICS_TOKEN }}
+                  config_timezone: Asia/Singapore
+                  output_action: gist
+                  committer_gist: 3c7c2041dfa27c7413455eae1c7ccb11
+                  base: ""
+                  plugin_music: yes
+                  plugin_music_provider: lastfm
+                  plugin_music_token: ${{ secrets.LASTFM_TOKEN }}
+                  plugin_16personalities: yes
+                  plugin_16personalities_url: ${{ secrets.PERSONALITIES_URL }}
+                  plugin_16personalities_sections: personality, profile, traits
