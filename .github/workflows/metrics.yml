@@ -14,7 +14,7 @@ jobs:
         runs-on: ubuntu-latest
         steps:
             - name: Generate GitHub metrics
-              if: ${{ success() || failure() }}
+              if: '!cancelled()'
               uses: lowlighter/metrics@latest
               with:
                   filename: github.svg
@@ -46,7 +46,7 @@ jobs:
                   plugin_wakatime_token: ${{ secrets.WAKATIME_TOKEN }}
 
             - name: Generate achievements and trivia
-              if: ${{ success() || failure() }}
+              if: '!cancelled()'
               uses: lowlighter/metrics@latest
               with:
                   filename: achievements-trivia.svg
@@ -67,7 +67,7 @@ jobs:
                   plugin_16personalities_sections: personality, profile, traits
 
             - name: Generate HIMEHINA Now Hot screenshot
-              if: ${{ success() || failure() }}
+              if: '!cancelled()'
               uses: lowlighter/metrics@latest
               with:
                   filename: himehina-now-hot.svg
@@ -88,7 +88,7 @@ jobs:
                       }
 
             - name: Generate HIMEHINA Updates screenshot
-              if: ${{ success() || failure() }}
+              if: '!cancelled()'
               uses: lowlighter/metrics@latest
               with:
                   filename: himehina-updates.svg
@@ -107,3 +107,9 @@ jobs:
                         "width": 1920,
                         "height": 1080
                       }
+
+    keepalive:
+        name: Keepalive
+        runs-on: ubuntu-latest
+        steps:
+            - uses: gautamkrishnar/keepalive-workflow@v1
