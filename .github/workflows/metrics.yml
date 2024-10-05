@@ -19,7 +19,7 @@ jobs:
               with:
                   filename: github.svg
                   token: ${{ secrets.METRICS_TOKEN }}
-                  config_timezone: Asia/Singapore
+                  config_timezone: America/Chicago
                   output_action: gist
                   committer_gist: ${{ vars.GIST_ID }}
                   config_padding: 0, 8
@@ -51,7 +51,7 @@ jobs:
               with:
                   filename: achievements-trivia.svg
                   token: ${{ secrets.METRICS_TOKEN }}
-                  config_timezone: Asia/Singapore
+                  config_timezone: America/Chicago
                   output_action: gist
                   committer_gist: ${{ vars.GIST_ID }}
                   config_padding: 0, 8
@@ -72,7 +72,7 @@ jobs:
               with:
                   filename: himehina-now-hot.svg
                   token: ${{ secrets.METRICS_TOKEN }}
-                  config_timezone: Asia/Singapore
+                  config_timezone: America/Chicago
                   output_action: gist
                   committer_gist: ${{ vars.GIST_ID }}
                   config_padding: 0, 8
@@ -93,7 +93,7 @@ jobs:
               with:
                   filename: himehina-updates.svg
                   token: ${{ secrets.METRICS_TOKEN }}
-                  config_timezone: Asia/Singapore
+                  config_timezone: America/Chicago
                   output_action: gist
                   committer_gist: ${{ vars.GIST_ID }}
                   config_padding: 0, 8
