@@ -66,7 +66,7 @@ jobs:
                   plugin_16personalities_url: ${{ secrets.PERSONALITIES_URL }}
                   plugin_16personalities_sections: personality, profile, traits
 
-            - name: Generate HIMEHINA Now Hot screenshot
+            - name: Generate HIMEHINA Info screenshot
               if: '!cancelled()'
               uses: lowlighter/metrics@latest
               with:
@@ -78,16 +78,16 @@ jobs:
                   config_padding: 0, 8
                   base: ""
                   plugin_screenshot: yes
-                  plugin_screenshot_title: HIMEHINA Now Hot
+                  plugin_screenshot_title: HIMEHINA Info
                   plugin_screenshot_url: https://himehina.jp/
-                  plugin_screenshot_selector: .nowhot
+                  plugin_screenshot_selector: "#himehina_grid > div:nth-child(1) > div"
                   plugin_screenshot_viewport: |
                       {
                         "width": 1920,
                         "height": 1080
                       }
 
-            - name: Generate HIMEHINA Updates screenshot
+            - name: Generate HIMEHINA New Releases screenshot
               if: '!cancelled()'
               uses: lowlighter/metrics@latest
               with:
@@ -99,9 +99,9 @@ jobs:
                   config_padding: 0, 8
                   base: ""
                   plugin_screenshot: yes
-                  plugin_screenshot_title: HIMEHINA Updates
+                  plugin_screenshot_title: HIMEHINA New Releases
                   plugin_screenshot_url: https://himehina.jp/
-                  plugin_screenshot_selector: .updates
+                  plugin_screenshot_selector: "#himehina_grid > div:nth-child(5) > div"
                   plugin_screenshot_viewport: |
                       {
                         "width": 1920,
