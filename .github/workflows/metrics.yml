@@ -9,13 +9,11 @@ on:
     workflow_dispatch:
 
 jobs:
-    metrics:
-        name: Update metrics
+    github-metrics:
+        name: Generate GitHub metrics
         runs-on: ubuntu-latest
         steps:
-            - name: Generate GitHub metrics
-              if: '!cancelled()'
-              uses: lowlighter/metrics@latest
+            - uses: lowlighter/metrics@latest
               with:
                   filename: github.svg
                   token: ${{ secrets.METRICS_TOKEN }}
@@ -45,9 +43,11 @@ jobs:
                   plugin_wakatime: yes
                   plugin_wakatime_token: ${{ secrets.WAKATIME_TOKEN }}
 
-            - name: Generate achievements and trivia
-              if: '!cancelled()'
-              uses: lowlighter/metrics@latest
+    achievements-trivia:
+        name: Generate achievements and trivia
+        runs-on: ubuntu-latest
+        steps:
+            - uses: lowlighter/metrics@latest
               with:
                   filename: achievements-trivia.svg
                   token: ${{ secrets.METRICS_TOKEN }}
@@ -66,9 +66,11 @@ jobs:
                   plugin_16personalities_url: ${{ secrets.PERSONALITIES_URL }}
                   plugin_16personalities_sections: personality, profile, traits
 
-            - name: Generate HIMEHINA Info screenshot
-              if: '!cancelled()'
-              uses: lowlighter/metrics@latest
+    himehina-info:
+        name: Generate HIMEHINA Info screenshot
+        runs-on: ubuntu-latest
+        steps:
+            - uses: lowlighter/metrics@latest
               with:
                   filename: himehina-now-hot.svg
                   token: ${{ secrets.METRICS_TOKEN }}
@@ -87,9 +89,11 @@ jobs:
                         "height": 1080
                       }
 
-            - name: Generate HIMEHINA New Releases screenshot
-              if: '!cancelled()'
-              uses: lowlighter/metrics@latest
+    himehina-releases:
+        name: Generate HIMEHINA New Releases screenshot
+        runs-on: ubuntu-latest
+        steps:
+            - uses: lowlighter/metrics@latest
               with:
                   filename: himehina-updates.svg
                   token: ${{ secrets.METRICS_TOKEN }}
