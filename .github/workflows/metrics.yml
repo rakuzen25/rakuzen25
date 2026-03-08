@@ -13,7 +13,7 @@ jobs:
         name: Generate GitHub metrics
         runs-on: ubuntu-latest
         steps:
-            - uses: lowlighter/metrics@latest
+            - uses: gh-metrics/metrics@master
               with:
                   filename: github.svg
                   token: ${{ secrets.METRICS_TOKEN }}
@@ -47,7 +47,7 @@ jobs:
         name: Generate achievements and trivia
         runs-on: ubuntu-latest
         steps:
-            - uses: lowlighter/metrics@latest
+            - uses: gh-metrics/metrics@master
               with:
                   filename: achievements-trivia.svg
                   token: ${{ secrets.METRICS_TOKEN }}
@@ -70,7 +70,7 @@ jobs:
         name: Generate HIMEHINA Info screenshot
         runs-on: ubuntu-latest
         steps:
-            - uses: lowlighter/metrics@latest
+            - uses: gh-metrics/metrics@master
               with:
                   filename: himehina-now-hot.svg
                   token: ${{ secrets.METRICS_TOKEN }}
@@ -93,7 +93,7 @@ jobs:
         name: Generate HIMEHINA New Releases screenshot
         runs-on: ubuntu-latest
         steps:
-            - uses: lowlighter/metrics@latest
+            - uses: gh-metrics/metrics@master
               with:
                   filename: himehina-updates.svg
                   token: ${{ secrets.METRICS_TOKEN }}
