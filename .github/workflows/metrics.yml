@@ -88,6 +88,7 @@ jobs:
                         "width": 1920,
                         "height": 1080
                       }
+                  plugin_screenshot_lazyload: yes
 
     himehina-releases:
         name: Generate HIMEHINA New Releases screenshot
