@@ -85,8 +85,8 @@ jobs:
                   plugin_screenshot_selector: "#himehina_grid > div:nth-child(1) > div"
                   plugin_screenshot_viewport: |
                       {
-                        "width": 1920,
-                        "height": 1080
+                        "width": 2560,
+                        "height": 1440
                       }
 
     himehina-releases:
@@ -109,8 +109,8 @@ jobs:
                   plugin_screenshot_lazyload: yes
                   plugin_screenshot_viewport: |
                       {
-                        "width": 1920,
-                        "height": 1080
+                        "width": 2560,
+                        "height": 1440
                       }
 
     keepalive:
