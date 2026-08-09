@@ -106,7 +106,7 @@ jobs:
                   plugin_screenshot_title: HIMEHINA New Releases
                   plugin_screenshot_url: https://himehina.jp/
                   plugin_screenshot_selector: "#himehina_grid > div:nth-child(5) > div"
-                  plugin_screenshot_lazyload: yes
+                  plugin_screenshot_lazy_load: yes
                   plugin_screenshot_viewport: |
                       {
                         "width": 1920,
