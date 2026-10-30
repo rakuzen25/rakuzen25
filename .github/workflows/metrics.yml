@@ -1,7 +1,6 @@
-# Experimental branch only. The default branch retains its original production workflow.
-# No gist/commit/keepalive/deployment actions; uploads contain only the four named SVGs.
+# Experimental branch only; production main remains untouched.
 name: Metrics fork experiment (artifact only)
-"on":
+'on':
   push:
     branches:
       - experiment/metrics-fork-real-env-2026-10-30
@@ -21,34 +20,23 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           repository: rakuzen25/metrics
-          ref: d88f12a645c62cd4871783cb496f73a958586ff1
+          ref: 0bff3a3447d33c5e805c14c9898add2f5202703a
           path: metrics-source
           persist-credentials: false
       - name: Build clean fork image before passing any service secrets
         env:
-          EXPECTED_SHA: d88f12a645c62cd4871783cb496f73a958586ff1
-        run: >-
+          EXPECTED_SHA: 0bff3a3447d33c5e805c14c9898add2f5202703a
+        run: |-
           set -euo pipefail
-
           actual=$(git -C metrics-source rev-parse HEAD)
-
           test "$actual" = "$EXPECTED_SHA"
-
           test ! -e metrics-source/.env
-
           version=$(node -p "require('./metrics-source/package.json').version")
-
           image="metrics:forked-$version"
-
           docker build --label "org.opencontainers.image.revision=$EXPECTED_SHA" -t "$image" metrics-source
-
-          test "$(docker image inspect "$image" --format '{{ index .Config.Labels "org.opencontainers.image.revision" }}')" =
-          "$EXPECTED_SHA"
-
+          test "$(docker image inspect "$image" --format '{{ index .Config.Labels "org.opencontainers.image.revision" }}')" = "$EXPECTED_SHA"
           docker run --rm --entrypoint sh "$image" -ec 'test ! -e /metrics/.env'
-
           echo "METRICS_EXPERIMENT_IMAGE=$image" >> "$GITHUB_ENV"
-
           echo "Verified clean source image at $actual"
       - name: Run source regressions and real Chromium slow/failed-image fixtures
         id: fixtures
@@ -58,125 +46,136 @@ jobs:
           node node_modules/jest/bin/jest.js --runInBand --testPathPattern="regression.test.js$"
           node tests/browser/screenshot.integration.mjs
           '
+      - name: Diagnose public HIMEHINA image layout without secrets
+        id: diagnostics
+        continue-on-error: true
+        run: |-
+          mkdir -p "$RUNNER_TEMP/metrics-public-diagnostics"
+          docker run --rm --entrypoint node -e METRICS_ARTIFACT_DIR=/diagnostics -v "$RUNNER_TEMP/metrics-public-diagnostics:/diagnostics" "$METRICS_EXPERIMENT_IMAGE" tests/browser/himehina-diagnostics.mjs
       - name: Render real public GitHub activity
         id: activity
         continue-on-error: true
-        uses: rakuzen25/metrics@d88f12a645c62cd4871783cb496f73a958586ff1
+        uses: rakuzen25/metrics@0bff3a3447d33c5e805c14c9898add2f5202703a
         with:
           user: rakuzen25
           token: ${{ secrets.METRICS_TOKEN }}
           output_action: none
-          dryrun: "no"
-          use_prebuilt_image: "no"
-          committer_gist: ""
-          committer_token: ""
-          clean_workflows: ""
-          config_presets: ""
+          dryrun: 'no'
+          use_prebuilt_image: 'no'
+          committer_gist: ''
+          committer_token: ''
+          clean_workflows: ''
+          config_presets: ''
           config_output: svg
           config_timezone: America/Chicago
           config_padding: 0, 8
-          base: ""
-          plugins_errors_fatal: "yes"
-          retries: "1"
-          retries_delay: "0"
-          debug: "no"
-          debug_print: "no"
-          notice_releases: "no"
+          base: ''
+          plugins_errors_fatal: 'yes'
+          retries: '1'
+          retries_delay: '0'
+          debug: 'no'
+          debug_print: 'no'
+          notice_releases: 'no'
           filename: experiment/activity.svg
-          plugin_activity: "yes"
-          plugin_activity_load: "300"
-          plugin_activity_limit: "5"
+          plugin_activity: 'yes'
+          plugin_activity_load: '300'
+          plugin_activity_limit: '5'
           plugin_activity_visibility: public
       - name: Render existing personality profile
         id: personality
         continue-on-error: true
-        uses: rakuzen25/metrics@d88f12a645c62cd4871783cb496f73a958586ff1
+        uses: rakuzen25/metrics@0bff3a3447d33c5e805c14c9898add2f5202703a
         with:
           user: rakuzen25
           token: ${{ secrets.METRICS_TOKEN }}
           output_action: none
-          dryrun: "no"
-          use_prebuilt_image: "no"
-          committer_gist: ""
-          committer_token: ""
-          clean_workflows: ""
-          config_presets: ""
+          dryrun: 'no'
+          use_prebuilt_image: 'no'
+          committer_gist: ''
+          committer_token: ''
+          clean_workflows: ''
+          config_presets: ''
           config_output: svg
           config_timezone: America/Chicago
           config_padding: 0, 8
-          base: ""
-          plugins_errors_fatal: "yes"
-          retries: "1"
-          retries_delay: "0"
-          debug: "no"
-          debug_print: "no"
-          notice_releases: "no"
+          base: ''
+          plugins_errors_fatal: 'yes'
+          retries: '1'
+          retries_delay: '0'
+          debug: 'no'
+          debug_print: 'no'
+          notice_releases: 'no'
           filename: experiment/16personalities.svg
-          plugin_16personalities: "yes"
+          plugin_16personalities: 'yes'
           plugin_16personalities_url: ${{ secrets.PERSONALITIES_URL }}
           plugin_16personalities_sections: personality, profile, traits
       - name: Render HIMEHINA info reference
         id: info
         continue-on-error: true
-        uses: rakuzen25/metrics@d88f12a645c62cd4871783cb496f73a958586ff1
+        uses: rakuzen25/metrics@0bff3a3447d33c5e805c14c9898add2f5202703a
         with:
           user: rakuzen25
           token: ${{ secrets.METRICS_TOKEN }}
           output_action: none
-          dryrun: "no"
-          use_prebuilt_image: "no"
-          committer_gist: ""
-          committer_token: ""
-          clean_workflows: ""
-          config_presets: ""
+          dryrun: 'no'
+          use_prebuilt_image: 'no'
+          committer_gist: ''
+          committer_token: ''
+          clean_workflows: ''
+          config_presets: ''
           config_output: svg
           config_timezone: America/Chicago
           config_padding: 0, 8
-          base: ""
-          plugins_errors_fatal: "yes"
-          retries: "1"
-          retries_delay: "0"
-          debug: "no"
-          debug_print: "no"
-          notice_releases: "no"
+          base: ''
+          plugins_errors_fatal: 'yes'
+          retries: '1'
+          retries_delay: '0'
+          debug: 'no'
+          debug_print: 'no'
+          notice_releases: 'no'
           filename: experiment/himehina-info.svg
-          plugin_screenshot: "yes"
+          plugin_screenshot: 'yes'
           plugin_screenshot_title: HIMEHINA Info
           plugin_screenshot_url: https://himehina.jp/
-          plugin_screenshot_selector: "#himehina_grid > div:nth-child(1) > div"
-          plugin_screenshot_viewport: "{\"width\":1920,\"height\":1080}"
+          plugin_screenshot_selector: '#himehina_grid > div:nth-child(1) > div'
+          plugin_screenshot_viewport: '{"width":1920,"height":1080}'
       - name: Render HIMEHINA releases with lazy-image readiness
         id: releases
         continue-on-error: true
-        uses: rakuzen25/metrics@d88f12a645c62cd4871783cb496f73a958586ff1
+        uses: rakuzen25/metrics@0bff3a3447d33c5e805c14c9898add2f5202703a
         with:
           user: rakuzen25
           token: ${{ secrets.METRICS_TOKEN }}
           output_action: none
-          dryrun: "no"
-          use_prebuilt_image: "no"
-          committer_gist: ""
-          committer_token: ""
-          clean_workflows: ""
-          config_presets: ""
+          dryrun: 'no'
+          use_prebuilt_image: 'no'
+          committer_gist: ''
+          committer_token: ''
+          clean_workflows: ''
+          config_presets: ''
           config_output: svg
           config_timezone: America/Chicago
           config_padding: 0, 8
-          base: ""
-          plugins_errors_fatal: "yes"
-          retries: "1"
-          retries_delay: "0"
-          debug: "no"
-          debug_print: "no"
-          notice_releases: "no"
+          base: ''
+          plugins_errors_fatal: 'yes'
+          retries: '1'
+          retries_delay: '0'
+          debug: 'no'
+          debug_print: 'no'
+          notice_releases: 'no'
           filename: experiment/himehina-releases.svg
-          plugin_screenshot: "yes"
+          plugin_screenshot: 'yes'
           plugin_screenshot_title: HIMEHINA New Releases
           plugin_screenshot_url: https://himehina.jp/
-          plugin_screenshot_selector: "#himehina_grid > div:nth-child(5) > div"
-          plugin_screenshot_lazy_load: "yes"
-          plugin_screenshot_viewport: "{\"width\":1920,\"height\":1080}"
-      - name: Upload only the four isolated SVG outputs
+          plugin_screenshot_selector: '#himehina_grid > div:nth-child(5) > div'
+          plugin_screenshot_lazy_load: 'yes'
+          plugin_screenshot_viewport: '{"width":1920,"height":1080}'
+      - name: Create local previews with external requests blocked
+        id: previews
+        continue-on-error: true
+        run: docker run --rm --network none --entrypoint node -e METRICS_ARTIFACT_DIR=/renders -v /metrics_renders/experiment:/renders "$METRICS_EXPERIMENT_IMAGE"
+          tests/browser/render-experiment-previews.mjs
+      - name: Upload only named isolated SVGs and PNG previews
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
@@ -186,6 +185,23 @@ jobs:
             /metrics_renders/experiment/16personalities.svg
             /metrics_renders/experiment/himehina-info.svg
             /metrics_renders/experiment/himehina-releases.svg
+            /metrics_renders/experiment/activity.png
+            /metrics_renders/experiment/16personalities.png
+            /metrics_renders/experiment/himehina-info.png
+            /metrics_renders/experiment/himehina-releases.png
+          if-no-files-found: warn
+          retention-days: 3
+      - name: Upload public-only HIMEHINA diagnostics
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: metrics-public-diagnostics-${{ github.run_id }}
+          path: |-
+            ${{ runner.temp }}/metrics-public-diagnostics/public-production-record.png
+            ${{ runner.temp }}/metrics-public-diagnostics/public-direct-capture.png
+            ${{ runner.temp }}/metrics-public-diagnostics/public-reset-origin.png
+            ${{ runner.temp }}/metrics-public-diagnostics/public-expanded-viewport.png
+            ${{ runner.temp }}/metrics-public-diagnostics/public-diagnostics.json
           if-no-files-found: warn
           retention-days: 3
       - name: Require all tests and renders to pass
@@ -196,10 +212,12 @@ jobs:
           PERSONALITY: ${{ steps.personality.outcome }}
           INFO: ${{ steps.info.outcome }}
           RELEASES: ${{ steps.releases.outcome }}
+          DIAGNOSTICS: ${{ steps.diagnostics.outcome }}
+          PREVIEWS: ${{ steps.previews.outcome }}
         run: |-
           set -euo pipefail
           printf 'fixtures=%s activity=%s personality=%s info=%s releases=%s\n' "$FIXTURES" "$ACTIVITY" "$PERSONALITY" "$INFO" "$RELEASES"
-          for outcome in "$FIXTURES" "$ACTIVITY" "$PERSONALITY" "$INFO" "$RELEASES"; do
+          for outcome in "$DIAGNOSTICS" "$PREVIEWS" "$FIXTURES" "$ACTIVITY" "$PERSONALITY" "$INFO" "$RELEASES"; do
             test "$outcome" = success
           done
           for output in activity 16personalities himehina-info himehina-releases; do
