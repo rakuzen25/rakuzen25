@@ -20,12 +20,12 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           repository: rakuzen25/metrics
-          ref: 0bff3a3447d33c5e805c14c9898add2f5202703a
+          ref: 895ec4d591a8996c0a664a7a507afcde0295548e
           path: metrics-source
           persist-credentials: false
       - name: Build clean fork image before passing any service secrets
         env:
-          EXPECTED_SHA: 0bff3a3447d33c5e805c14c9898add2f5202703a
+          EXPECTED_SHA: 895ec4d591a8996c0a664a7a507afcde0295548e
         run: |-
           set -euo pipefail
           actual=$(git -C metrics-source rev-parse HEAD)
@@ -52,10 +52,11 @@ jobs:
         run: |-
           mkdir -p "$RUNNER_TEMP/metrics-public-diagnostics"
           docker run --rm --entrypoint node -e METRICS_ARTIFACT_DIR=/diagnostics -v "$RUNNER_TEMP/metrics-public-diagnostics:/diagnostics" "$METRICS_EXPERIMENT_IMAGE" tests/browser/himehina-diagnostics.mjs
+          docker run --rm --entrypoint node -e METRICS_ARTIFACT_DIR=/diagnostics -v "$RUNNER_TEMP/metrics-public-diagnostics:/diagnostics" "$METRICS_EXPERIMENT_IMAGE" tests/browser/himehina.capture.mjs
       - name: Render real public GitHub activity
         id: activity
         continue-on-error: true
-        uses: rakuzen25/metrics@0bff3a3447d33c5e805c14c9898add2f5202703a
+        uses: rakuzen25/metrics@895ec4d591a8996c0a664a7a507afcde0295548e
         with:
           user: rakuzen25
           token: ${{ secrets.METRICS_TOKEN }}
@@ -84,7 +85,7 @@ jobs:
       - name: Render existing personality profile
         id: personality
         continue-on-error: true
-        uses: rakuzen25/metrics@0bff3a3447d33c5e805c14c9898add2f5202703a
+        uses: rakuzen25/metrics@895ec4d591a8996c0a664a7a507afcde0295548e
         with:
           user: rakuzen25
           token: ${{ secrets.METRICS_TOKEN }}
@@ -112,7 +113,7 @@ jobs:
       - name: Render HIMEHINA info reference
         id: info
         continue-on-error: true
-        uses: rakuzen25/metrics@0bff3a3447d33c5e805c14c9898add2f5202703a
+        uses: rakuzen25/metrics@895ec4d591a8996c0a664a7a507afcde0295548e
         with:
           user: rakuzen25
           token: ${{ secrets.METRICS_TOKEN }}
@@ -142,7 +143,7 @@ jobs:
       - name: Render HIMEHINA releases with lazy-image readiness
         id: releases
         continue-on-error: true
-        uses: rakuzen25/metrics@0bff3a3447d33c5e805c14c9898add2f5202703a
+        uses: rakuzen25/metrics@895ec4d591a8996c0a664a7a507afcde0295548e
         with:
           user: rakuzen25
           token: ${{ secrets.METRICS_TOKEN }}
@@ -202,6 +203,9 @@ jobs:
             ${{ runner.temp }}/metrics-public-diagnostics/public-reset-origin.png
             ${{ runner.temp }}/metrics-public-diagnostics/public-expanded-viewport.png
             ${{ runner.temp }}/metrics-public-diagnostics/public-diagnostics.json
+            ${{ runner.temp }}/metrics-public-diagnostics/himehina-cold-1.png
+            ${{ runner.temp }}/metrics-public-diagnostics/himehina-cold-2.png
+            ${{ runner.temp }}/metrics-public-diagnostics/himehina-cold-3.png
           if-no-files-found: warn
           retention-days: 3
       - name: Require all tests and renders to pass
