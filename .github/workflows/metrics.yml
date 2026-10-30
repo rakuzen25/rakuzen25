@@ -1,133 +1,207 @@
-name: Metrics
-
-on:
-    schedule: [{ cron: "25 9 * * *" }]
-    push:
-        branches:
-            - main
-            - dev
-    workflow_dispatch:
-
+# Experimental branch only. The default branch retains its original production workflow.
+# No gist/commit/keepalive/deployment actions; uploads contain only the four named SVGs.
+name: Metrics fork experiment (artifact only)
+"on":
+  push:
+    branches:
+      - experiment/metrics-fork-real-env-2026-10-30
+  workflow_dispatch: {}
+permissions:
+  contents: read
+concurrency:
+  group: metrics-fork-experiment-${{ github.ref }}
+  cancel-in-progress: false
 jobs:
-    github-metrics:
-        name: Generate GitHub metrics
-        runs-on: ubuntu-latest
-        steps:
-            - uses: gh-metrics/metrics@master
-              with:
-                  filename: github.svg
-                  token: ${{ secrets.METRICS_TOKEN }}
-                  config_timezone: America/Chicago
-                  output_action: gist
-                  committer_gist: ${{ vars.GIST_ID }}
-                  config_padding: 0, 8
-                  base: header, activity, community, repositories, metadata
-                  base_indepth: yes
-                  plugin_activity: yes
-                  plugin_followup: yes
-                  plugin_followup_indepth: yes
-                  plugin_followup_sections: repositories, user
-                  plugin_habits: yes
-                  plugin_habits_facts: yes
-                  plugin_habits_charts: no
-                  plugin_languages: yes
-                  plugin_languages_details: lines, bytes-size, percentage
-                  plugin_languages_indepth: yes
-                  plugin_languages_limit: 5
-                  plugin_lines: yes
-                  plugin_notable: yes
-                  plugin_notable_from: all
-                  plugin_notable_types: commit
-                  plugin_people: yes
-                  plugin_traffic: yes
-                  plugin_wakatime: yes
-                  plugin_wakatime_token: ${{ secrets.WAKATIME_TOKEN }}
+  experiment:
+    if: github.repository == 'rakuzen25/rakuzen25' && github.ref == 'refs/heads/experiment/metrics-fork-real-env-2026-10-30'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Checkout the exact fork source without persisted credentials
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: rakuzen25/metrics
+          ref: d88f12a645c62cd4871783cb496f73a958586ff1
+          path: metrics-source
+          persist-credentials: false
+      - name: Build clean fork image before passing any service secrets
+        env:
+          EXPECTED_SHA: d88f12a645c62cd4871783cb496f73a958586ff1
+        run: >-
+          set -euo pipefail
 
-    achievements-trivia:
-        name: Generate achievements and trivia
-        runs-on: ubuntu-latest
-        steps:
-            - uses: gh-metrics/metrics@master
-              with:
-                  filename: achievements-trivia.svg
-                  token: ${{ secrets.METRICS_TOKEN }}
-                  config_timezone: America/Chicago
-                  output_action: gist
-                  committer_gist: ${{ vars.GIST_ID }}
-                  config_padding: 0, 8
-                  config_order: achievements, music, 16personalities
-                  base: ""
-                  plugin_achievements: yes
-                  plugin_music: yes
-                  plugin_music_provider: spotify
-                  plugin_music_token: ${{ secrets.SPOTIFY_TOKENS }}
-                  plugin_music_limit: 8
-                  plugin_16personalities: yes
-                  plugin_16personalities_url: ${{ secrets.PERSONALITIES_URL }}
-                  plugin_16personalities_sections: personality, profile, traits
+          actual=$(git -C metrics-source rev-parse HEAD)
 
-    himehina-info:
-        name: Generate HIMEHINA Info screenshot
-        runs-on: ubuntu-latest
-        steps:
-            - uses: gh-metrics/metrics@master
-              with:
-                  filename: himehina-now-hot.svg
-                  token: ${{ secrets.METRICS_TOKEN }}
-                  config_timezone: America/Chicago
-                  output_action: gist
-                  committer_gist: ${{ vars.GIST_ID }}
-                  config_padding: 0, 8
-                  base: ""
-                  plugin_screenshot: yes
-                  plugin_screenshot_title: HIMEHINA Info
-                  plugin_screenshot_url: https://himehina.jp/
-                  plugin_screenshot_selector: "#himehina_grid > div:nth-child(1) > div"
-                  plugin_screenshot_viewport: |
-                      {
-                        "width": 1920,
-                        "height": 1080
-                      }
+          test "$actual" = "$EXPECTED_SHA"
 
-    himehina-releases:
-        name: Generate HIMEHINA New Releases screenshot
-        runs-on: ubuntu-latest
-        steps:
-            - uses: gh-metrics/metrics@master
-              with:
-                  filename: himehina-updates.svg
-                  token: ${{ secrets.METRICS_TOKEN }}
-                  config_timezone: America/Chicago
-                  output_action: gist
-                  committer_gist: ${{ vars.GIST_ID }}
-                  config_padding: 0, 8
-                  base: ""
-                  plugin_screenshot: yes
-                  plugin_screenshot_title: HIMEHINA New Releases
-                  plugin_screenshot_url: https://himehina.jp/
-                  plugin_screenshot_selector: "#himehina_grid > div:nth-child(5) > div"
-                  plugin_screenshot_lazy_load: yes
-                  plugin_screenshot_viewport: |
-                      {
-                        "width": 1920,
-                        "height": 1080
-                      }
+          test ! -e metrics-source/.env
 
-    keepalive:
-        name: Keepalive
-        runs-on: ubuntu-latest
-        permissions:
-            actions: write
-        steps:
-            - name: Re-enable workflow
-              env:
-                  GITHUB_TOKEN: ${{ inputs.GITHUB_TOKEN || github.token }}
-              shell: sh
-              run: |
-                  case "${GITHUB_WORKFLOW_REF:?}" in
-                    "${GITHUB_REPOSITORY:?}"/.github/workflows/*.y*ml@*) ;;
-                    *) false ;;
-                  esac
-                  workflow="${GITHUB_WORKFLOW_REF%%@*}"
-                  workflow="${workflow#${GITHUB_REPOSITORY}/.github/workflows/}"
-                  gh api -X PUT "repos/${GITHUB_REPOSITORY}/actions/workflows/${workflow}/enable"
+          version=$(node -p "require('./metrics-source/package.json').version")
+
+          image="metrics:forked-$version"
+
+          docker build --label "org.opencontainers.image.revision=$EXPECTED_SHA" -t "$image" metrics-source
+
+          test "$(docker image inspect "$image" --format '{{ index .Config.Labels "org.opencontainers.image.revision" }}')" =
+          "$EXPECTED_SHA"
+
+          docker run --rm --entrypoint sh "$image" -ec 'test ! -e /metrics/.env'
+
+          echo "METRICS_EXPERIMENT_IMAGE=$image" >> "$GITHUB_ENV"
+
+          echo "Verified clean source image at $actual"
+      - name: Run source regressions and real Chromium slow/failed-image fixtures
+        id: fixtures
+        continue-on-error: true
+        run: |-
+          docker run --rm --entrypoint sh "$METRICS_EXPERIMENT_IMAGE" -ec '
+          node node_modules/jest/bin/jest.js --runInBand --testPathPattern="regression.test.js$"
+          node tests/browser/screenshot.integration.mjs
+          '
+      - name: Render real public GitHub activity
+        id: activity
+        continue-on-error: true
+        uses: rakuzen25/metrics@d88f12a645c62cd4871783cb496f73a958586ff1
+        with:
+          user: rakuzen25
+          token: ${{ secrets.METRICS_TOKEN }}
+          output_action: none
+          dryrun: "no"
+          use_prebuilt_image: "no"
+          committer_gist: ""
+          committer_token: ""
+          clean_workflows: ""
+          config_presets: ""
+          config_output: svg
+          config_timezone: America/Chicago
+          config_padding: 0, 8
+          base: ""
+          plugins_errors_fatal: "yes"
+          retries: "1"
+          retries_delay: "0"
+          debug: "no"
+          debug_print: "no"
+          notice_releases: "no"
+          filename: experiment/activity.svg
+          plugin_activity: "yes"
+          plugin_activity_load: "300"
+          plugin_activity_limit: "5"
+          plugin_activity_visibility: public
+      - name: Render existing personality profile
+        id: personality
+        continue-on-error: true
+        uses: rakuzen25/metrics@d88f12a645c62cd4871783cb496f73a958586ff1
+        with:
+          user: rakuzen25
+          token: ${{ secrets.METRICS_TOKEN }}
+          output_action: none
+          dryrun: "no"
+          use_prebuilt_image: "no"
+          committer_gist: ""
+          committer_token: ""
+          clean_workflows: ""
+          config_presets: ""
+          config_output: svg
+          config_timezone: America/Chicago
+          config_padding: 0, 8
+          base: ""
+          plugins_errors_fatal: "yes"
+          retries: "1"
+          retries_delay: "0"
+          debug: "no"
+          debug_print: "no"
+          notice_releases: "no"
+          filename: experiment/16personalities.svg
+          plugin_16personalities: "yes"
+          plugin_16personalities_url: ${{ secrets.PERSONALITIES_URL }}
+          plugin_16personalities_sections: personality, profile, traits
+      - name: Render HIMEHINA info reference
+        id: info
+        continue-on-error: true
+        uses: rakuzen25/metrics@d88f12a645c62cd4871783cb496f73a958586ff1
+        with:
+          user: rakuzen25
+          token: ${{ secrets.METRICS_TOKEN }}
+          output_action: none
+          dryrun: "no"
+          use_prebuilt_image: "no"
+          committer_gist: ""
+          committer_token: ""
+          clean_workflows: ""
+          config_presets: ""
+          config_output: svg
+          config_timezone: America/Chicago
+          config_padding: 0, 8
+          base: ""
+          plugins_errors_fatal: "yes"
+          retries: "1"
+          retries_delay: "0"
+          debug: "no"
+          debug_print: "no"
+          notice_releases: "no"
+          filename: experiment/himehina-info.svg
+          plugin_screenshot: "yes"
+          plugin_screenshot_title: HIMEHINA Info
+          plugin_screenshot_url: https://himehina.jp/
+          plugin_screenshot_selector: "#himehina_grid > div:nth-child(1) > div"
+          plugin_screenshot_viewport: "{\"width\":1920,\"height\":1080}"
+      - name: Render HIMEHINA releases with lazy-image readiness
+        id: releases
+        continue-on-error: true
+        uses: rakuzen25/metrics@d88f12a645c62cd4871783cb496f73a958586ff1
+        with:
+          user: rakuzen25
+          token: ${{ secrets.METRICS_TOKEN }}
+          output_action: none
+          dryrun: "no"
+          use_prebuilt_image: "no"
+          committer_gist: ""
+          committer_token: ""
+          clean_workflows: ""
+          config_presets: ""
+          config_output: svg
+          config_timezone: America/Chicago
+          config_padding: 0, 8
+          base: ""
+          plugins_errors_fatal: "yes"
+          retries: "1"
+          retries_delay: "0"
+          debug: "no"
+          debug_print: "no"
+          notice_releases: "no"
+          filename: experiment/himehina-releases.svg
+          plugin_screenshot: "yes"
+          plugin_screenshot_title: HIMEHINA New Releases
+          plugin_screenshot_url: https://himehina.jp/
+          plugin_screenshot_selector: "#himehina_grid > div:nth-child(5) > div"
+          plugin_screenshot_lazy_load: "yes"
+          plugin_screenshot_viewport: "{\"width\":1920,\"height\":1080}"
+      - name: Upload only the four isolated SVG outputs
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: metrics-fork-experiment-${{ github.run_id }}
+          path: |-
+            /metrics_renders/experiment/activity.svg
+            /metrics_renders/experiment/16personalities.svg
+            /metrics_renders/experiment/himehina-info.svg
+            /metrics_renders/experiment/himehina-releases.svg
+          if-no-files-found: warn
+          retention-days: 3
+      - name: Require all tests and renders to pass
+        if: always()
+        env:
+          FIXTURES: ${{ steps.fixtures.outcome }}
+          ACTIVITY: ${{ steps.activity.outcome }}
+          PERSONALITY: ${{ steps.personality.outcome }}
+          INFO: ${{ steps.info.outcome }}
+          RELEASES: ${{ steps.releases.outcome }}
+        run: |-
+          set -euo pipefail
+          printf 'fixtures=%s activity=%s personality=%s info=%s releases=%s\n' "$FIXTURES" "$ACTIVITY" "$PERSONALITY" "$INFO" "$RELEASES"
+          for outcome in "$FIXTURES" "$ACTIVITY" "$PERSONALITY" "$INFO" "$RELEASES"; do
+            test "$outcome" = success
+          done
+          for output in activity 16personalities himehina-info himehina-releases; do
+            test -s "/metrics_renders/experiment/$output.svg"
+          done
